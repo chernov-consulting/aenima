@@ -1,0 +1,53 @@
+[workspace]
+resolver = "2"
+members = ["crates/anima", "crates/anima-core"]
+
+[workspace.package]
+edition = "2021"
+version = "0.1.0"
+license = "UNLICENSED"
+authors = [
+    "Anton Chernov <anton@chernov.io>",
+    "Javier Amigo Miranda",
+]
+rust-version = "1.90"
+
+[workspace.dependencies]
+anyhow = "1.0"
+thiserror = "2.0"
+tokio = { version = "1.40", features = ["full"] }
+tokio-stream = "0.1"
+tokio-util = { version = "0.7", features = ["io"] }
+tokio-tungstenite = { version = "0.24", features = ["rustls-tls-native-roots"] }
+futures = "0.3"
+async-trait = "0.1"
+bytes = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "fmt"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+axum = { version = "0.7", features = ["macros"] }
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+sqlx = { version = "0.8", default-features = false, features = [
+    "postgres",
+    "runtime-tokio-rustls",
+    "migrate",
+    "uuid",
+    "chrono",
+    "json",
+] }
+pgvector = { version = "0.4", features = ["sqlx"] }
+cpal = "0.15"
+dotenvy = "0.15"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "stream"] }
+parking_lot = "0.12"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "debuginfo"
+
+[profile.dev.package.sqlx-macros]
+opt-level = 3

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Smart wrapper for local dev. Starts docker side services and can launch the daemon.
+# Pattern mirrors relsa/goclaw.io but simpler (only one side service for now).
+set -euo pipefail
+cd "$(dirname "$0")"
+
+# Load .env.base into the environment for docker-compose variable substitution
+if [[ -f .env.base ]]; then
+    set -a; source .env.base; set +a
+fi
+
+cmd="${1:-up}"
+shift || true
+
+case "$cmd" in
+    up)
+        echo "==> starting postgres (pgvector)"
+        docker compose up -d postgres
+        echo "==> waiting for postgres to be healthy"
+        for _ in $(seq 1 30); do
+            if docker compose ps postgres --format json | grep -q '"Health":"healthy"'; then
+                echo "==> postgres ready on localhost:${POSTGRES_PORT:-5433}"
+                exit 0
+            fi
+            sleep 1
+        done
+        echo "!! postgres did not become healthy in 30s" >&2
+        docker compose logs postgres >&2
+        exit 1
+        ;;
+    down)
+        docker compose down
+        ;;
+    logs)
+        docker compose logs -f "$@"
+        ;;
+    clean)
+        docker compose down -v
+        ;;
+    status)
+        docker compose ps
+        ;;
+    *)
+        echo "Usage: ./local [up|down|logs|clean|status]" >&2
+        exit 1
+        ;;
+esac

@@ -1,0 +1,41 @@
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# Python (for pyinvoke task runner)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.ruff_cache/
+.mypy_cache/
+
+# Env files (secrets) — matches relsa/goclaw.io pattern
+.env
+.env.*
+!.env.example
+!.env.base
+.env.devkeys
+.env.personal
+
+# IDE / OS
+.idea/
+.vscode/
+.history/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Local dev cache (./local build hashes)
+.build-hashes/
+
+# Data (ingested media, local postgres volume if bound)
+data/
+!data/.gitkeep
+
+# Build artifacts
+dist/
+*.log

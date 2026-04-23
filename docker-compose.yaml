@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: anima-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-anima}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-anima}
+      POSTGRES_DB: ${POSTGRES_DB:-anima}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - anima-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-anima} -d ${POSTGRES_DB:-anima}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  anima-postgres-data:

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>anima · debug</title>
+    <style>
+      :root {
+        color-scheme: dark light;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        --fg: #e6e6e6;
+        --dim: #888;
+        --bg: #111;
+        --card: #181818;
+        --accent: #7fc98d;
+        --warn: #e0a847;
+        --err: #e06c6c;
+      }
+      @media (prefers-color-scheme: light) {
+        :root { --fg: #111; --dim: #555; --bg: #f7f7f5; --card: #fff; }
+      }
+      html, body { height: 100%; margin: 0; }
+      body {
+        font-family: var(--mono);
+        background: var(--bg);
+        color: var(--fg);
+        padding: 24px;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+      h1 { font-size: 18px; margin: 0; font-weight: 600; }
+      h1 .dim { color: var(--dim); font-weight: 400; }
+      main {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid rgba(127, 127, 127, 0.15);
+        border-radius: 6px;
+        padding: 14px 16px;
+      }
+      .card h2 {
+        margin: 0 0 10px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--dim);
+        font-weight: 600;
+      }
+      pre { margin: 0; white-space: pre-wrap; word-break: break-all; }
+      .k { color: var(--dim); }
+      .v { color: var(--fg); }
+      .ok   { color: var(--accent); }
+      .warn { color: var(--warn); }
+      .err  { color: var(--err); }
+      footer {
+        color: var(--dim);
+        margin-top: 24px;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>anima <span class="dim">· debug</span></h1>
+      <span id="clock" class="dim"></span>
+    </header>
+    <main>
+      <section class="card">
+        <h2>state</h2>
+        <pre id="state">loading…</pre>
+      </section>
+      <section class="card">
+        <h2>memory</h2>
+        <pre id="memory">loading…</pre>
+      </section>
+      <section class="card">
+        <h2>input devices</h2>
+        <pre id="devices-in">loading…</pre>
+      </section>
+      <section class="card">
+        <h2>output devices</h2>
+        <pre id="devices-out">loading…</pre>
+      </section>
+    </main>
+    <footer>
+      anima prototype · pgvector + cpal + tokio · no frameworks harmed during the making of this page
+    </footer>
+    <script>
+      const el = (id) => document.getElementById(id);
+      const fmt = (obj) => JSON.stringify(obj, null, 2);
+
+      async function j(path) {
+        try {
+          const r = await fetch(path);
+          return await r.json();
+        } catch (e) {
+          return { error: String(e) };
+        }
+      }
+
+      async function refresh() {
+        const [state, devices, memory] = await Promise.all([
+          j('/state'),
+          j('/devices'),
+          j('/memory/count'),
+        ]);
+        el('state').textContent = fmt(state);
+        el('memory').textContent = fmt(memory);
+        el('devices-in').textContent = fmt(devices.input || []);
+        el('devices-out').textContent = fmt(devices.output || []);
+      }
+
+      function tick() {
+        el('clock').textContent = new Date().toLocaleTimeString();
+      }
+
+      refresh();
+      tick();
+      setInterval(refresh, 5000);
+      setInterval(tick, 1000);
+    </script>
+  </body>
+</html>
